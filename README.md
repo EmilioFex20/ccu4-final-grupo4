@@ -90,8 +90,8 @@ Variables de entorno que todos deben usar igual:
 **Tareas:**
 
 - **Emilio**
-  - [ ] Crear el repo y la estructura de carpetas
-  - [ ] Escribir el contrato de la API en `docs/api.md`
+  - [x] Crear el repo y la estructura de carpetas
+  - [x] Escribir el contrato de la API en `docs/api.md`
   - [ ] Probar Floci con una imagen de ejemplo (jueves)
   - [ ] Desplegar el stack en Floci con las imágenes de GHCR (viernes)
 - **Jesús**
