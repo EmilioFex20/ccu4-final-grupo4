@@ -1,0 +1,16 @@
+server {
+    listen 8080;
+    root /usr/share/nginx/html;
+
+    # Generated from the API_URL environment variable when the container starts,
+    # so the same image works locally, on Floci and behind the proxy.
+    location = /config.js {
+        default_type application/javascript;
+        add_header Cache-Control "no-store";
+        return 200 'window.API_URL = "${API_URL}";';
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
