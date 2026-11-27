@@ -7,7 +7,9 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (
+    Image,
     ListFlowable,
     ListItem,
     Paragraph,
@@ -86,6 +88,22 @@ def convertir(ruta):
             else:
                 story.append(XPreformatted("\n".join(bloque), style["code"]))
             story.append(Spacer(1, 5))
+            continue
+        imagen = re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", linea.strip())
+        if imagen:
+            texto, relativa = imagen.groups()
+            archivo = (ruta.parent / relativa).resolve()
+            if archivo.exists():
+                ancho, alto = ImageReader(str(archivo)).getSize()
+                disponible = letter[0] - 4 * cm
+                escala = min(disponible / ancho, (8 * cm) / alto, 1)
+                story.append(Image(str(archivo), width=ancho * escala, height=alto * escala))
+                if texto:
+                    story.append(Paragraph(inline(texto), style["small"]))
+            else:
+                story.append(Paragraph(inline(f"Imagen no encontrada: {relativa}"), style["note"]))
+            story.append(Spacer(1, 6))
+            i += 1
             continue
         if linea.startswith("|") and i + 1 < len(lineas) and lineas[i + 1].startswith("|"):
             bloque = []

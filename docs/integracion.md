@@ -10,8 +10,8 @@ Responsable: Johana. Este documento evita que el monitoreo, la carga o el chaos 
 | Pipeline y GHCR | Jesús | Implementado y en verde | Ninguno; no se tocó `ci.yml` | Evidencia de pipeline y push obtenida de logs |
 | Floci | Emilio | Archivos de tareas presentes | Confirmar red y nombre de contenedores si se desea scrapear desde Floci | Sin cambios; evidencia pendiente |
 | Scripts AWS boto3 y controller | Emilio | Aún no existen | Registrar `targets.d/controller.json`; publicar métricas con etiquetas de fase/origen para escalamiento y local vs AWS | Sin paneles de escalamiento con datos |
-| IAM policy del auto-scaler | Johana + Emilio | Definida en `infra/aws/` | El controller debe pasar `InstanceType` explícito y operar en `us-east-1` | Si Emilio necesita otro tipo/región, se coordina cambio de política |
-| Budget de 1 USD | Johana | Definido como código | Emilio debe terminar instancias; el budget solo avisa | No se creó el recurso en AWS |
+| IAM policy del auto-scaler | Johana + Emilio | Creada en AWS como `CCU4-RestrictEC2MicroInstances`; no adjuntada | El controller debe pasar `InstanceType` explícito y operar en `us-east-1`; además debe adjuntarse la política | Si Emilio necesita otro tipo/región, se coordina cambio de política |
+| Budget de 1 USD | Johana | Creado en AWS como `CCU4-Budget-1USD`; 1.00 USD mensuales y alerta configurada | Emilio debe terminar instancias; el budget solo avisa | Sin evidencia de entrega de correo ni de gasto real |
 | Lambda y recibos | Carlos | Aún no existe | Definir el evento `order created` para extender Locust con esa ruta | No se simula el evento |
 
 ## Reglas que se respetaron

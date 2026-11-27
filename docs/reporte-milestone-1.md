@@ -2,7 +2,7 @@
 
 - Autor: Johana, Site Reliability Engineer y Documentación
 - Fecha: 2026-11-27
-- Estado: actualizado con evidencias reales de API/logs y ejecución local; pendientes las capturas visuales de Floci y GHCR y la validación en AWS
+- Estado: actualizado con evidencias reales de API/logs, ejecución local y capturas de IAM/Budget en AWS; pendientes las capturas visuales de Floci y GHCR, la adjunción de la política y la verificación de entrega del correo
 
 ## 1. Introducción
 
@@ -26,7 +26,7 @@ El borrador del diagrama está en [`arquitectura.md`](arquitectura.md).
 
 ## 4. Tecnologías utilizadas
 
-Python 3.13, FastAPI, Uvicorn, psycopg 3, Redis-py, PostgreSQL 16, Redis 7, Nginx, Docker y Docker Compose, Floci (ECS local), GitHub Actions, GHCR, AWS IAM y AWS Budgets (configuración como código), Prometheus y Grafana (fase 3 en adelante), Locust (fase 5).
+Python 3.13, FastAPI, Uvicorn, psycopg 3, Redis-py, PostgreSQL 16, Redis 7, Nginx, Docker y Docker Compose, Floci (ECS local), GitHub Actions, GHCR, AWS IAM y AWS Budgets (recursos creados y capturados en la cuenta gratuita), Prometheus y Grafana (fase 3 en adelante), Locust (fase 5).
 
 ## 5. Responsabilidades de los integrantes
 
@@ -71,17 +71,18 @@ La política `infra/aws/iam-policy-micro-only.json` declara cuatro `Deny`:
 3. `ec2:ModifyInstanceAttribute` hacia tipos no autorizados.
 4. Acciones EC2 fuera de `us-east-1`.
 
-Los `Allow` se limitan a la lectura necesaria para el controller más `RunInstances`, `CreateTags` y `TerminateInstances`. No se asume que las instancias micro sean gratuitas. La política no se aplicó a ninguna cuenta ni se adjuntó a ningún principal.
+Los `Allow` se limitan a la lectura necesaria para el controller más `RunInstances`, `CreateTags` y `TerminateInstances`. No se asume que las instancias micro sean gratuitas. La política sí se creó en la cuenta gratuita como `CCU4-RestrictEC2MicroInstances` (captura 14:40), pero **no se adjuntó a ningún principal** y no se probó una denegación en vivo. Detalle: `evidencia/2026-11-27-1440-aws-iam-budget.md`.
 
 ## 10. Configuración del presupuesto
 
-`infra/aws/budget.json` define 1.00 USD mensual con notificaciones `ACTUAL` al 50/80/100 % y `FORECASTED` al 100 %, dirigidas al correo configurado en `AWS_BUDGET_EMAIL`. El destinatario real no está versionado. El presupuesto avisa, **no detiene costos**; la terminación de instancias depende del controller.
+`infra/aws/budget.json` define 1.00 USD mensual con notificaciones `ACTUAL` al 50/80/100 % y `FORECASTED` al 100 %, dirigidas al correo configurado en `AWS_BUDGET_EMAIL`. En AWS se creó `CCU4-Budget-1USD` (captura 14:47): 1.00 USD, periodo mensual, inicio `2026-11-01` y regla visible `Costo real > 100%`. El destinatario aparece en la consola, pero se ocultó en la copia pública y su verificación está pendiente; no hay evidencia de entrega. El presupuesto avisa, **no detiene costos**; la terminación de instancias depende del controller.
 
 ## 11. Resultados verificables
 
 - `python infra/aws/verify.py` → `RESULTADO: OK` (2026-11-27 12:44 -08:00).
 - `python infra/aws/setup_iam.py` y `setup_budget.py` → modo simulación, sin llamadas a AWS.
-- Pipeline: run `45953227796`, 4/4 checks en success.
+- Capturas reales de AWS: política creada 14:40 y presupuesto creado 14:47; revisadas y redactadas sin datos sensibles.
+- Pipeline: run `45953227796`, 4/4 checks en success; el PR #3 también tiene la ejecución `46075104127` en success tras el fix de CI.
 - GHCR: dos manifiestos publicados según logs del pipeline.
 - `docker compose -f docker-compose.yml config --quiet` → código 0.
 
@@ -95,8 +96,8 @@ Los `Allow` se limitan a la lectura necesaria para el controller más `RunInstan
 
 ## 13. Conclusiones
 
-La base del proyecto existe y el pipeline está funcionando. Las responsabilidades de Johana de seguridad y control de gasto están implementadas como código validado localmente, listas para aplicarse con autorización. Monitoreo, carga y resiliencia ya tienen evidencia real del stack local. Quedan pendientes la aplicación en AWS, las capturas visuales que requieren entornos de otros integrantes y la correlación con el controller de Emilio.
+La base del proyecto existe y el pipeline está funcionando. Las responsabilidades de Johana de seguridad y control de gasto están creadas en AWS y documentadas con capturas reales, además de permanecer como código reproducible. Monitoreo, carga y resiliencia ya tienen evidencia real del stack local. Quedan pendientes la adjunción y prueba de la política, la verificación de entrega del correo, las capturas visuales que requieren entornos de otros integrantes y la correlación con el controller de Emilio.
 
 ## 14. Evidencias disponibles y pendientes
 
-Ver [`docs/evidencia/README.md`](evidencia/README.md). Disponibles: pipeline, GHCR por logs, herramientas/validación local, stack real, Grafana con datos, Locust y chaos. Pendientes: Floci, Packages visual, AWS real y correlación Locust ↔ AWS.
+Ver [`docs/evidencia/README.md`](evidencia/README.md). Disponibles: pipeline, GHCR por logs, herramientas/validación local, stack real, Grafana con datos, Locust, chaos y capturas de IAM/Budget en AWS. Pendientes: Floci, Packages visual, adjunción/prueba de la política, entrega del correo de alerta y correlación Locust ↔ AWS.

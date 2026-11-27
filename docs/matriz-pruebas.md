@@ -22,5 +22,8 @@ Leyenda: **Ejecutada** significa que se corrió el comando en esta sesión y se 
 | T16 | Chaos engineering real | `powershell -ExecutionPolicy Bypass -File ./chaos/run_chaos.ps1` | Ejecutada: 8 escenarios `ok`, proxy `pendiente`, código 0 | evidencia 13:14 |
 | T17 | Correlación Locust ↔ AWS | `fases.log` + logs boto3 | Pendiente: requiere controller de Emilio | — |
 | T18 | Verificación de credenciales expuestas | escaneo de `git diff` y archivos | Ejecutada en QA | QA |
+| T19 | Creación real de la política IAM | Consola AWS, captura `AWS_IAM_Policy.png` | Ejecutada por el usuario: `CCU4-RestrictEC2MicroInstances` creada; sin adjunción ni prueba de denegación | `docs/evidencia/2026-11-27-1440-aws-iam-budget.md` |
+| T20 | Creación real del presupuesto | Consola AWS, captura `AWS_Budget_Alarm.png` | Ejecutada por el usuario: `CCU4-Budget-1USD`, 1.00 USD mensuales y regla `Costo real > 100%`; entrega de correo pendiente | `docs/evidencia/2026-11-27-1440-aws-iam-budget.md` |
+| T21 | Revisión y redacción de capturas AWS | OCR local sobre copias públicas | Ejecutada: ID/alias de cuenta, nombres y correo ya no aparecen | `docs/evidencia/2026-11-27-1440-aws-iam-budget.md` |
 
 Los resultados T08/T09 se obtuvieron con `promtool` oficial v2.55.0 descargado en un directorio temporal fuera del repositorio. Los resultados T12–T16 están detallados en `docs/evidencia/2026-11-27-1314-stack-monitoreo-carga-chaos.md`.

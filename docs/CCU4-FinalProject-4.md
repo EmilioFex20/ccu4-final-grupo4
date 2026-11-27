@@ -7,7 +7,7 @@ Autor de este documento: Johana, Site Reliability Engineer y Documentación
 Fecha: 2026-11-27
 Entrega prevista: `CCU4-FinalProject-4.pdf` (miércoles 2 de diciembre, 11 PM)
 
-**Estado del borrador:** incluye resultados reales verificables hasta el commit `55044eb` en `main`, ahora con stack local, monitoreo, Locust y chaos ejecutados. No incluye resultados de AWS ni capturas de Floci porque no se ejecutaron o no estaban disponibles. No se inventaron capturas, despliegues ni métricas.
+**Estado del borrador:** incluye resultados reales verificables hasta el commit `55044eb` en `main`, con stack local, monitoreo, Locust y chaos ejecutados, y capturas reales de la política IAM y del presupuesto en la cuenta AWS gratuita. No incluye capturas de Floci, adjunción de la política, prueba de denegación, entrega de correo de alerta ni logs de instancias porque no están disponibles. No se inventaron capturas, despliegues ni métricas.
 
 ## 1. Introducción
 
@@ -42,10 +42,10 @@ Python 3.13, FastAPI, Uvicorn, psycopg 3, Redis-py, PostgreSQL 16, Redis 7, Ngin
 
 | Integrante | Responsabilidades oficiales | Estado en el repositorio al 2026-11-27 |
 |---|---|---|
-| Emilio | Floci, scripts AWS con boto3 y auto-scaler | Tareas de Floci presentes; controller y scripts AWS pendientes |
+| Emilio | Floci, scripts AWS con boto3 y auto-scaler | Tareas de Floci presentes; controller y scripts AWS pendientes; la política y el budget ya existen en AWS |
 | Jesús | GitHub Actions, GHCR, rolling update y reverse proxy | Pipeline en verde e imágenes publicadas; proxy pendiente |
 | Carlos | Frontend, API, Postgres, Redis, Dockerfiles y Lambda | API, web y compose presentes; Lambda pendiente |
-| Johana | Monitoreo, Locust, chaos, IAM, Budget, reportes y PDF | IAM y Budget como código; Prometheus/Grafana/Locust/chaos implementados y verificados en local; documentación en curso |
+| Johana | Monitoreo, Locust, chaos, IAM, Budget, reportes y PDF | IAM y Budget creados en AWS con capturas redactadas; Prometheus/Grafana/Locust/chaos verificados en local; documentación actualizada |
 
 ## 6. Hitos y resultados verificables
 
@@ -53,14 +53,14 @@ Python 3.13, FastAPI, Uvicorn, psycopg 3, Redis-py, PostgreSQL 16, Redis 7, Ngin
 
 - Pipeline `CI` con cuatro checks en verde: run `45953227796`, 2026-11-27T06:39:14Z a 06:40:34Z.
 - Imágenes `api` y `web` publicadas en GHCR con tags `latest` y `sha-55044eb`, según logs del pipeline.
-- Política IAM y Budget definidos, validados en modo local; sin aplicación real a AWS.
+- Política IAM `CCU4-RestrictEC2MicroInstances` y presupuesto `CCU4-Budget-1USD` creados en AWS; capturas 14:40 y 14:47, redactadas y documentadas.
 - Reporte del Milestone 1 y diagrama de arquitectura en `docs/`.
 - Detalle: `docs/reporte-milestone-1.md`.
 
 ### Milestone 2
 
 - Scripts boto3 y Lambda: pendientes de Emilio y Carlos.
-- IAM y Budget listos para cuando esos scripts se integren; el controller debe enviar `InstanceType` explícito.
+- IAM y Budget ya existen en AWS; falta adjuntar la política a un principal. El controller debe enviar `InstanceType` explícito (`t2.micro` o `t3.micro`).
 
 ### Milestone 3
 
@@ -78,11 +78,21 @@ Python 3.13, FastAPI, Uvicorn, psycopg 3, Redis-py, PostgreSQL 16, Redis 7, Ngin
 
 ## 7. Seguridad IAM y AWS Budget
 
-La política `infra/aws/iam-policy-micro-only.json` bloquea `RunInstances` con tipos distintos de `t2.micro` y `t3.micro`, bloquea la omisión del tipo, prohíbe redimensionar a tipos no autorizados y limita EC2 a `us-east-1`. Los permisos concedidos son los necesarios para que el auto-scaler describa, cree, etiquete y termine instancias.
+La política real creada en la consola es `CCU4-RestrictEC2MicroInstances`, no el nombre por defecto del script reproducible. La regla visible es `Deny` de `ec2:RunInstances` cuando `ec2:InstanceType` no es `t2.micro` ni `t3.micro`; el recurso es `arn:aws:ec2:*:*:instance/*`. Como una sentencia `Deny` explícita prevalece sobre cualquier `Allow`, un principal que use esta política no podrá lanzar instancias de otros tipos ni omitir el tipo. La política no concede `RunInstances` por sí sola y **no está adjuntada** a ningún principal; tampoco se ejecutó una prueba de denegación en vivo.
 
-El presupuesto `infra/aws/budget.json` es de 1.00 USD mensual con alertas ACTUAL al 50/80/100 % y FORECASTED al 100 %. El correo se inyecta por `AWS_BUDGET_EMAIL`. AWS Budget solo notifica: no detiene costos. No se asume que las instancias micro sean gratuitas.
+### Evidencia 7.1 · Política IAM creada en AWS
 
-No se crearon recursos reales, no se adjuntó la política a ningún principal y no se generaron cargos.
+![Política IAM CCU4-RestrictEC2MicroInstances](evidencia/AWS_IAM_Policy.png)
+
+La captura de las 14:40 muestra el mensaje de creación y el JSON de la política. Se ocultaron el identificador/alias de cuenta y el nombre del usuario; la regla de tipos permaneció visible.
+
+### Evidencia 7.2 · Presupuesto mensual creado en AWS
+
+![Presupuesto CCU4-Budget-1USD](evidencia/AWS_Budget_Alarm.png)
+
+La captura de las 14:47 muestra `CCU4-Budget-1USD`, 1.00 USD mensuales, periodo `Mensual`, inicio `2026-11-01`, estado `En buen estado`, gasto visible de 0,00 US$ y la regla `Costo real > 100%`. El destinatario del correo se ocultó en la copia pública y aparece con verificación pendiente: hay configuración de notificación, pero **no hay evidencia de entrega**. AWS Budget solo avisa; la terminación de instancias depende del controller de Emilio.
+
+La plantilla `infra/aws/budget.json` conserva las alertas `ACTUAL` al 50/80/100 % y `FORECASTED` al 100 % como contrato reproducible; la captura confirma únicamente la regla visible indicada. No se crearon instancias, no se ampliaron permisos y no se modificó el trabajo de otros integrantes. Detalle completo y limitaciones: `docs/evidencia/2026-11-27-1440-aws-iam-budget.md`.
 
 ## 8. Monitoreo
 
@@ -108,6 +118,8 @@ El script `chaos/run_chaos.ps1` detiene y reinicia `api`, detiene temporalmente 
 |---|---|
 | Validación IAM/Budget (`verify.py`) | Ejecutada: OK |
 | Simulación `setup_iam.py` y `setup_budget.py` | Ejecutada: sin llamadas a AWS |
+| Creación real de IAM y Budget en AWS | Ejecutada por el usuario: capturas 14:40 y 14:47, sin adjunción ni prueba de denegación |
+| Revisión y redacción de capturas AWS | Ejecutada: OCR sin ID/alias de cuenta, nombres ni correo en copias públicas |
 | Validación JSON/YAML | Ejecutada: 10 archivos válidos |
 | Validación Compose principal y de monitoreo | Ejecutada: código 0 |
 | `promtool check config` y `check rules` | Ejecutada: SUCCESS, 8 reglas |
@@ -116,7 +128,7 @@ El script `chaos/run_chaos.ps1` detiene y reinicia `api`, detiene temporalmente 
 | Stack local, Prometheus en vivo y Grafana | Ejecutada: 3 targets `up`, 9 contenedores y dashboard con datos |
 | Locust real | Ejecutada: 14,076 peticiones, 0 fallos, p95 84 ms |
 | Chaos real | Ejecutada: 8 escenarios `ok`, proxy `pendiente` |
-| AWS real y correlación con Locust | Pendientes: requieren autorización y controller |
+| Correlación Locust ↔ AWS y logs de instancias | Pendientes: requieren controller de Emilio; IAM y Budget ya están creados |
 
 Matriz completa: `docs/matriz-pruebas.md`.
 
@@ -124,21 +136,21 @@ Matriz completa: `docs/matriz-pruebas.md`.
 
 Incidencias principales: daemon de Docker apagado al inicio (resuelto), falta de scope `read:packages` para listar GHCR, ausencia de controller y proxy, falta de `/metrics` en la API y ausencia de dashboard de Floci en este equipo. Durante la integración se corrigieron tres defectos propios: el exporter de Docker no soportaba socket Unix en Python 3.13, el script de chaos comprobaba la raíz de la API en lugar de `/health`, y PowerShell 5.1 necesitaba BOM para codificar el informe. `promtool` no estaba instalado y se resolvió descargando el release oficial a un directorio temporal; las rutas del config se ajustaron para que la validación local no emitiera advertencias.
 
-El 2026-11-27 se detectó además el incidente GitGuardian `41459752`: una contraseña genérica asociada al administrador de Grafana quedó referenciada en el Compose del commit `cd6ffea`. La causa raíz fue un valor de ejemplo en `.env.example` junto con una referencia explícita a la variable en `environment`. La credencial se rotó en la base persistente de Grafana sin borrar volúmenes: la anterior devuelve `401` y la nueva `200`; el datasource y el dashboard permanecen intactos. El Compose ahora carga la credencial desde `.env` ignorado y `.env.example` no contiene valores sensibles. La alerta sigue pendiente de cierre porque el valor original permanece en el historial y retirarlo requiere autorización para reescribir la rama. Detalle: `docs/incidente-gitguardian-41459752.md`.
+El 2026-11-27 se detectó además el incidente GitGuardian `41459752`: una contraseña genérica asociada al administrador de Grafana quedó referenciada en el Compose del commit `cd6ffea`. La causa raíz fue un valor de ejemplo en `.env.example` junto con una referencia explícita a la variable en `environment`. La credencial se rotó en la base persistente de Grafana sin borrar volúmenes: la anterior devuelve `401` y la nueva `200`; el datasource y el dashboard permanecen intactos. El Compose ahora carga la credencial desde `.env` ignorado y `.env.example` no contiene valores sensibles. La alerta sigue pendiente de cierre porque el valor original permanece en el historial; se eligió gestionarla en el dashboard sin reescribir la rama. Los cuatro jobs de GitHub Actions del PR #3 pasaron en el run `46075104127`, pero el check de GitGuardian sigue en `FAILURE` por la ocurrencia antigua. Detalle: `docs/incidente-gitguardian-41459752.md`.
 
 Detalle: `docs/incidencias.md`, `docs/post-mortem.md` e `incidente-gitguardian-41459752.md`.
 
 ## 14. Evidencias disponibles y pendientes
 
-Disponibles: pipeline CI, push a GHCR por logs, herramientas y validación local IAM/Budget, validación de Prometheus con `promtool`, evidencia de stack real, targets y dashboard, CSV de Locust y JSON de chaos.
+Disponibles: pipeline CI, push a GHCR por logs, herramientas y validación local IAM/Budget, capturas reales de la política IAM y del budget con datos sensibles ocultos, validación de Prometheus con `promtool`, evidencia de stack real, targets y dashboard, CSV de Locust y JSON de chaos.
 
-Pendientes: captura visual de Floci, captura de GHCR Packages, AWS real, correlación Locust ↔ AWS y validación del reverse proxy de Jesús.
+Pendientes: captura visual de Floci, captura de GHCR Packages, adjunción y prueba de la política IAM, entrega del correo de alerta, correlación Locust ↔ AWS, logs de instancias del controller y validación del reverse proxy de Jesús.
 
 Índice: `docs/evidencia/README.md`. Toda evidencia incluye fecha y hora.
 
 ## 15. Conclusiones y trabajo pendiente
 
-La parte de Johana quedó implementada como código reproducible, integrada sin sobrescribir el trabajo de sus compañeros y verificada en vivo: stack local, Prometheus, Grafana, Locust y chaos funcionaron con datos reales. Para completar el PDF definitivo se necesita: capturas de Floci y GHCR, el reverse proxy de Jesús y los logs de creación y terminación de instancias del controller de Emilio. Hasta entonces este documento es un borrador honesto, sin datos ficticios.
+La parte de Johana quedó implementada como código reproducible e integrada sin sobrescribir el trabajo de sus compañeros: stack local, Prometheus, Grafana, Locust y chaos funcionaron con datos reales, y la política IAM y el presupuesto quedaron creados en AWS con capturas verificadas y redactadas. Para completar el PDF definitivo se necesita: capturas de Floci y GHCR, adjunción/prueba de la política, confirmación de entrega del correo de alerta, el reverse proxy de Jesús y los logs de creación y terminación de instancias del controller de Emilio. Hasta entonces este documento es un borrador honesto, sin datos ficticios.
 
 ## 16. Comandos de referencia
 

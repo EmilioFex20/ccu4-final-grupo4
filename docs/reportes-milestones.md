@@ -8,7 +8,7 @@ Estado: borradores al 2026-11-27. Solo se afirma lo ejecutado; las entregas de o
 |---|---|---|
 | Emilio | Scripts boto3 para crear, configurar y terminar instancias | Pendiente: `infra/aws/` solo contiene los archivos de Johana |
 | Carlos | Lambda que genera recibos en S3 | Pendiente: `infra/lambda/` no existe |
-| Johana | Política IAM y Budget que limiten el costo de esos scripts | Implementados como código y validados localmente; sin `--apply` |
+| Johana | Política IAM y Budget que limiten el costo de esos scripts | Creados en AWS como `CCU4-RestrictEC2MicroInstances` y `CCU4-Budget-1USD`; capturas 14:40/14:47; sin adjunción ni prueba de denegación |
 
 Dependencia: el controller debe crear instancias con `InstanceType` explícito para que la política IAM no bloquee la prueba.
 
@@ -26,7 +26,7 @@ Dependencia: cuando controller y proxy expongan `/metrics`, se agregan sus targe
 
 | Responsable | Entrega esperada | Estado observable |
 |---|---|---|
-| Johana | Locust, chaos, capturas y PDF | Locust y chaos ejecutados en local: 14,076 peticiones, 0 fallos y 8 escenarios `ok`; borrador del PDF generado; capturas externas pendientes |
+| Johana | Locust, chaos, capturas y PDF | Locust y chaos ejecutados en local: 14,076 peticiones, 0 fallos y 8 escenarios `ok`; capturas IAM/Budget obtenidas y redactadas; borrador del PDF actualizado; capturas de Floci y GHCR pendientes |
 | Emilio | Logs de creación y terminación de instancias de 5 a 10 minutos | Pendiente |
 | Jesús y Emilio | Capturas de Floci y GHCR | GHCR por logs obtenido; captura visual pendiente |
 | Carlos | API estable durante la carga | Pipeline en verde; carga real ejecutada sin fallos |

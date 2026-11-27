@@ -1,6 +1,6 @@
 # Post-mortem · Limitaciones de verificación
 
-Fecha: 2026-11-27. Autor: Johana. Estado: actualizado con stack local, monitoreo, Locust y chaos ejecutados; sigue pendiente la correlación con AWS.
+Fecha: 2026-11-27. Autor: Johana. Estado: actualizado con stack local, monitoreo, Locust, chaos y capturas de IAM/Budget en AWS; sigue pendiente la correlación con el controller.
 
 ## Qué pasó
 
@@ -11,7 +11,8 @@ La implementación de monitoreo, carga y resiliencia quedó lista y se verificó
 - Sí hay series temporales reales en Prometheus y un dashboard de Grafana aprovisionado con datos de sondas y contenedores.
 - Sí hay CSV/HTML de Locust con 14,076 peticiones, 0 fallos, 52 req/s y p95 de 84 ms; 4,224 de esas peticiones fueron `POST /orders` reales.
 - Sí hay resultados de chaos: ocho escenarios en `ok` y el de reverse proxy en `pendiente`.
-- No hay evidencia de creación/terminación de instancias AWS ni correlación con `fases.log`.
+- Sí hay evidencia visual de la creación de la política IAM y del presupuesto de 1 USD, con capturas redactadas.
+- No hay evidencia de creación/terminación de instancias AWS ni correlación con `fases.log`; la política tampoco está adjuntada ni probada en vivo.
 - Sí hay validaciones estáticas reales: IAM/Budget, JSON/YAML, Compose y Prometheus con `promtool`.
 
 ## Causa raíz
@@ -32,7 +33,7 @@ La implementación de monitoreo, carga y resiliencia quedó lista y se verificó
 | Aportar captura de Floci y de GHCR Packages | Emilio/Jesús | Pendiente |
 | Repetir el post-mortem con datos de AWS reales | Johana | Pendiente: requiere controller y autorización |
 | Rotar y verificar la credencial de Grafana tras GitGuardian 41459752 | Johana | Completada; anterior `401`, nueva `200` |
-| Retirar la credencial del historial de `feature/johana-sre` | Johana + equipo | Pendiente: requiere autorización para reescribir y force push |
+| Resolver GitGuardian 41459752 en el dashboard | Johana + equipo | Pendiente: se eligió gestionar el incidente sin reescribir el historial; el check sigue rojo por `cd6ffea` |
 
 ## Lecciones aprendidas
 

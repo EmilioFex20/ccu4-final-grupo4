@@ -4,7 +4,7 @@ Responsable: Johana (SRE). Alcance: control de seguridad y gasto del Milestone 1
 
 ## Estado de ejecución
 
-Los archivos y scripts están implementados y validados **en modo local**. **No se crearon ni modificaron recursos reales de AWS**: no se ejecutó `--apply`, no se adjuntó la política a usuarios/roles y no se creó el presupuesto. Los permisos de la cuenta siguen intactos.
+Los archivos y scripts están implementados y validados en modo local. El 2026-11-27 se crearon en la cuenta gratuita la política `CCU4-RestrictEC2MicroInstances` y el presupuesto `CCU4-Budget-1USD`; hay capturas reales en `docs/evidencia/`. **No se adjuntó la política a usuarios/roles, no se crearon instancias EC2 ni se ejecutaron pruebas de denegación en AWS**. Los permisos de la cuenta no se ampliaron.
 
 ## Archivos
 
@@ -41,6 +41,16 @@ El controller debe llamar a `RunInstances` con el parámetro `InstanceType` expl
 - Destinatario: se toma de `AWS_BUDGET_EMAIL` o de `--email`. La plantilla versionada contiene solo el marcador `__AWS_BUDGET_EMAIL__`; no hay correos ni credenciales reales en el repositorio.
 - Un AWS Budget **no detiene los gastos**: solo avisa. La terminación de instancias es responsabilidad del controller de Emilio y debe respetar la regla del README de 5 a 10 minutos de vida.
 
+## Evidencia de recursos creados
+
+- Política real: `CCU4-RestrictEC2MicroInstances`, con `Deny` de `ec2:RunInstances` cuando `ec2:InstanceType` no es `t2.micro` ni `t3.micro`.
+- Presupuesto real: `CCU4-Budget-1USD`, 1.00 USD mensuales, tipo `COST`, inicio `2026-11-01` y regla visible `Costo real > 100%`.
+- Las capturas están redactadas: no contienen identificador/alias de cuenta, nombres personales ni correos.
+- La notificación aparece configurada, pero con verificación pendiente; no hay evidencia de entrega de correo.
+- Detalle técnico y limitaciones: `docs/evidencia/2026-11-27-1440-aws-iam-budget.md`.
+
+Los nombres por defecto de los scripts siguen siendo `CCU4-Grupo4-MicroOnly-AutoScaler` y `ccu4-final-grupo4-mensual-1usd`; se conservan para no cambiar la herramienta reproducible. El nombre aplicado en la consola se documenta como autoridad del recurso creado.
+
 ## Comandos reproducibles
 
 Requisitos: Python 3.10+ y, solamente para las acciones con `--apply`, `boto3` y credenciales AWS configuradas (`aws configure --profile ccu4` o variables de entorno).
@@ -70,6 +80,6 @@ python infra/aws/verify.py --live --profile ccu4
 ## Criterios de verificación
 
 1. `verify.py` termina con `RESULTADO: OK`.
-2. En la consola IAM, la política `CCU4-Grupo4-MicroOnly-AutoScaler` contiene los cuatro `Deny`.
-3. En AWS Budgets, el presupuesto `ccu4-final-grupo4-mensual-1usd` muestra 1.00 USD y cuatro notificaciones.
+2. En la consola IAM, la política real `CCU4-RestrictEC2MicroInstances` contiene el `Deny` de tipos no micro visible en la captura 14:40; la afirmación de los cuatro `Deny` de la plantilla queda como validación local, no como resultado comprobado en la captura.
+3. En AWS Budgets, el presupuesto real `CCU4-Budget-1USD` muestra 1.00 USD, periodo mensual y la regla `Costo real > 100%` en la captura 14:47; la entrega del correo sigue pendiente de verificación.
 4. Una prueba controlada con `ec2:RunInstances` de `t3.small` debe ser rechazada; una con `t3.micro` debe ser permitida (solo en cuenta de prueba y con autorización).
