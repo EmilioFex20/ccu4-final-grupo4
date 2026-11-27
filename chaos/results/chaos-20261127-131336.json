@@ -1,0 +1,63 @@
+{
+    "fecha_hora_inicio":  "20261127-131336",
+    "fecha_hora_fin":  "2026-11-27T13:13:50-08:00",
+    "objetivo":  "http://localhost:8000",
+    "pedido_referencia":  4231,
+    "criterios":  "caída verificada, /health recuperado, pedido íntegro, frontend recuperado, sin borrado de volúmenes",
+    "escenarios":  [
+                       {
+                           "escenario":  "precondicion_pedido",
+                           "estado":  "ok",
+                           "detalle":  "pedido_id=4231 creado antes del caos; sin prueba de carga",
+                           "fecha_hora":  "2026-11-27T13:13:36-08:00"
+                       },
+                       {
+                           "escenario":  "caida_api",
+                           "estado":  "ok",
+                           "detalle":  "la API dejó de responder tras detener el contenedor api; sin prueba de carga",
+                           "fecha_hora":  "2026-11-27T13:13:37-08:00"
+                       },
+                       {
+                           "escenario":  "recuperacion_api",
+                           "estado":  "ok",
+                           "detalle":  "/health volvió a responder 2xx; sin prueba de carga",
+                           "fecha_hora":  "2026-11-27T13:13:41-08:00"
+                       },
+                       {
+                           "escenario":  "persistencia_pedidos",
+                           "estado":  "ok",
+                           "detalle":  "pedido 4231 íntegro tras reinicio de api",
+                           "fecha_hora":  "2026-11-27T13:13:41-08:00"
+                       },
+                       {
+                           "escenario":  "reinicio_api",
+                           "estado":  "ok",
+                           "detalle":  "/health respondió tras docker compose restart api; sin prueba de carga",
+                           "fecha_hora":  "2026-11-27T13:13:45-08:00"
+                       },
+                       {
+                           "escenario":  "perdida_nodo_web",
+                           "estado":  "ok",
+                           "detalle":  "la API sigue disponible con el frontend detenido; sin prueba de carga",
+                           "fecha_hora":  "2026-11-27T13:13:48-08:00"
+                       },
+                       {
+                           "escenario":  "recuperacion_web",
+                           "estado":  "ok",
+                           "detalle":  "frontend respondió en http://localhost:3000",
+                           "fecha_hora":  "2026-11-27T13:13:49-08:00"
+                       },
+                       {
+                           "escenario":  "reverse_proxy",
+                           "estado":  "pendiente",
+                           "detalle":  "no existe reverse proxy en el stack actual",
+                           "fecha_hora":  "2026-11-27T13:13:50-08:00"
+                       },
+                       {
+                           "escenario":  "recuperacion_final",
+                           "estado":  "ok",
+                           "detalle":  "estado final del stack local; sin prueba de carga",
+                           "fecha_hora":  "2026-11-27T13:13:50-08:00"
+                       }
+                   ]
+}

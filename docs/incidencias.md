@@ -1,0 +1,17 @@
+# Registro de incidencias
+
+| ID | Fecha y hora | Incidencia | Impacto | Estado | Acción |
+|---|---|---|---|---|---|
+| INC-01 | 2026-11-27 12:41 -08:00 | Docker daemon de Docker Desktop no disponible (`//./pipe/dockerDesktopLinuxEngine` no existe) | No se pudieron levantar contenedores, ejecutar Locust, chaos ni scrape real | Resuelta | Se inició Docker Desktop y se ejecutaron T13–T16 con éxito; detalle en evidencia 13:14 |
+| INC-02 | 2026-11-27 12:41 -08:00 | API REST de GitHub devuelve 403 por falta de scope `read:packages` al listar paquetes | No se puede listar GHCR por API | Mitigada | Se usaron los logs del pipeline como evidencia real del push; queda la captura visual pendiente |
+| INC-03 | 2026-11-27 12:41 -08:00 | `GET /orgs/EmilioFex20/packages` devuelve 404 | El propietario es usuario, no organización con paquetes visibles | Mitigada | Ver INC-02 |
+| INC-04 | 2026-11-27 12:41 -08:00 | No existe `infra/controller` ni `infra/proxy` | No hay métricas de escalamiento ni ruteo | Abierta | Contracts en `docs/integracion.md`; `targets.d` vacío hasta que Emilio/Jesús las expongan |
+| INC-05 | 2026-11-27 12:41 -08:00 | `docs/api.md` no define `/metrics` y la API no lo expone | No se puede medir RPS/latencia reales de clientes sin tocar código de Carlos | Abierta | Solicitar autorización a Carlos; mientras tanto, sondas del exportador con nombres explícitos |
+| INC-06 | 2026-11-27 12:43 -08:00 | `promtool` no estaba instalado como comando global | No se podía validar Prometheus localmente | Resuelta | Descarga del release oficial v2.55.0 a directorio temporal; config y reglas válidas |
+| INC-07 | 2026-11-27 12:47 -08:00 | `promtool` resolvía rutas absolutas `/etc/prometheus/...` relativas al directorio del config | Advertencias de `file_sd` en validación local | Resuelta | Rutas relativas `rules/*.yml` y `targets.d/*.json`; el contenedor las resuelve correctamente desde `/etc/prometheus` |
+| INC-08 | 2026-11-27 12:44 -08:00 | No hay dashboard de Floci accesible desde el equipo de Johana | Evidencia visual del Milestone 1 pendiente | Abierta | Emilio debe aportar captura con fecha y hora |
+| INC-09 | 2026-11-27 13:10 -08:00 | `docker_exporter.py` usaba `http.client.HTTPConnection(..., unix_socket=...)`, argumento no soportado en Python 3.13 | El exporter estaba `up` pero no publicaba series de contenedores | Resuelta | Se implementó `UnixSocketHTTPConnection` con `AF_UNIX` y rutas `/v1.41`; tras rebuild publica 9 contenedores y 0 errores |
+| INC-10 | 2026-11-27 13:12 -08:00 | `run_chaos.ps1` comprobaba la raíz `http://localhost:8000`, que responde 404 | La precondición de chaos fallaba aunque la API estuviera sana | Resuelta | Se usa `$HealthUrl = "$ApiUrl/health"` para precondición, caída, recuperación y pérdida de web |
+| INC-11 | 2026-11-27 13:13 -08:00 | PowerShell 5.1 interpretaba el script de chaos sin BOM y convertía la salida de progreso de Docker en error terminante | Acentos mal codificados en el JSON y ejecución interrumpida | Resuelta | Se agregó BOM al script y el wrapper de Compose captura stderr sin lanzar excepción, verificando `$LASTEXITCODE` |
+
+No se registraron credenciales ni secretos en este repositorio por parte de Johana.

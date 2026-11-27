@@ -103,11 +103,11 @@ Variables de entorno que todos deben usar igual:
   - [x] Dockerfiles de `api` y `web`
   - [x] `docker-compose.yml` para levantar todo en local
 - **Johana**
-  - [ ] IAM policy que solo permita instancias Free Tier (t2.micro y t3.micro)
-  - [ ] Budget Alarm de $1.00 en AWS
-  - [ ] Capturas del pipeline, de GHCR y del dashboard de Floci en `docs/evidencia/`
-  - [ ] Reporte del Milestone 1
-  - [ ] Borrador del diagrama de arquitectura
+  - [ ] IAM policy que solo permita instancias Free Tier (t2.micro y t3.micro) — definida y validada en `infra/aws/`; pendiente de aplicar en AWS con autorización
+  - [ ] Budget Alarm de $1.00 en AWS — configurado como código en `infra/aws/budget.json`; pendiente de aplicar en la cuenta
+  - [ ] Capturas del pipeline, de GHCR y del dashboard de Floci en `docs/evidencia/` — pipeline y GHCR obtenidos por API/logs; falta el dashboard de Floci
+  - [x] Reporte del Milestone 1 — `docs/reporte-milestone-1.md`
+  - [x] Borrador del diagrama de arquitectura — `docs/arquitectura.md`
 
 ---
 
@@ -138,6 +138,23 @@ docker compose up --build
 _(Los puertos pueden cambiar cuando Carlos defina los servicios.)_
 
 ---
+
+## Monitoreo, carga y resiliencia (Johana)
+
+Documentación: [`docs/guia-aws.md`](docs/guia-aws.md), [`docs/guia-monitoreo.md`](docs/guia-monitoreo.md), [`docs/guia-grafana.md`](docs/guia-grafana.md), [`docs/guia-locust.md`](docs/guia-locust.md) y [`docs/guia-chaos.md`](docs/guia-chaos.md).
+
+```bash
+python infra/aws/verify.py
+docker compose up -d --build
+cd infra/monitoring && cp .env.example .env && docker compose -f docker-compose.monitoring.yml up -d --build
+cd ../..
+powershell -ExecutionPolicy Bypass -File ./loadtest/run_loadtest.ps1
+powershell -ExecutionPolicy Bypass -File ./chaos/run_chaos.ps1
+```
+
+Prometheus: `http://localhost:9090` · Grafana: `http://localhost:3001`. Las instancias AWS solo se crean con autorización y viven de 5 a 10 minutos.
+
+Verificación real del 2026-11-27: 3 targets `up` en Prometheus, 14,076 peticiones de Locust con 0 fallos y chaos con 8 escenarios `ok` (`reverse_proxy` pendiente de Jesús). Detalle: [`docs/evidencia/2026-11-27-1314-stack-monitoreo-carga-chaos.md`](docs/evidencia/2026-11-27-1314-stack-monitoreo-carga-chaos.md).
 
 ## Recordatorios
 
