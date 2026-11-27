@@ -9,8 +9,8 @@ Toda evidencia debe incluir fecha y hora. Los archivos de este directorio son re
 | 2026-11-27 12:44 | `2026-11-27-1244-herramientas.md` | Herramientas disponibles y validación local de IAM/Budget | Obtenida |
 | 2026-11-27 13:14 | `2026-11-27-1314-stack-monitoreo-carga-chaos.md` | Stack real, Prometheus/Grafana, Locust y chaos ejecutados | Obtenida |
 | 2026-11-27 22:00 | `2026-11-27-2200-gitguardian.md` | Rotación y verificación de la credencial de Grafana tras GitGuardian 41459752 | Obtenida; historial pendiente |
-| 2026-11-27 14:40 | `AWS_IAM_Policy.png` | Política IAM real `CCU4-RestrictEC2MicroInstances` creada; denegación de tipos distintos de `t2.micro`/`t3.micro` | Obtenida; copia pública redactada |
-| 2026-11-27 14:47 | `AWS_Budget_Alarm.png` | Presupuesto real `CCU4-Budget-1USD`: 1.00 USD mensual, umbral y notificación configurada | Obtenida; correo redactado y verificación pendiente |
+| 2026-11-27 14:40 | `AWS_IAM_Policy.png` | Política IAM real `CCU4-RestrictEC2MicroInstances` creada; denegación de tipos distintos de `t2.micro`/`t3.micro` | Obtenida; copia pública redactada y etiquetada con hora de entrega |
+| 2026-11-27 14:47 | `AWS_Budget_Alarm.png` | Presupuesto real `CCU4-Budget-1USD`: 1.00 USD mensual, umbral y notificación configurada | Obtenida; correo redactado, hora etiquetada y verificación pendiente |
 | 2026-11-27 14:40–14:47 | `2026-11-27-1440-aws-iam-budget.md` | Descripción técnica de ambos recursos, distinción entre creación/configuración/prueba y limitaciones | Obtenida |
 
 ## Evidencias pendientes

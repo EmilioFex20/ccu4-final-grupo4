@@ -84,13 +84,13 @@ La política real creada en la consola es `CCU4-RestrictEC2MicroInstances`, no e
 
 ![Política IAM CCU4-RestrictEC2MicroInstances](evidencia/AWS_IAM_Policy.png)
 
-La captura de las 14:40 muestra el mensaje de creación y el JSON de la política. Se ocultaron el identificador/alias de cuenta y el nombre del usuario; la regla de tipos permaneció visible.
+La copia pública, etiquetada con la hora de entrega 14:40, muestra el mensaje de creación y el JSON de la política. Se ocultaron el identificador/alias de cuenta y el nombre del usuario; la regla de tipos permaneció visible.
 
 ### Evidencia 7.2 · Presupuesto mensual creado en AWS
 
 ![Presupuesto CCU4-Budget-1USD](evidencia/AWS_Budget_Alarm.png)
 
-La captura de las 14:47 muestra `CCU4-Budget-1USD`, 1.00 USD mensuales, periodo `Mensual`, inicio `2026-11-01`, estado `En buen estado`, gasto visible de 0,00 US$ y la regla `Costo real > 100%`. El destinatario del correo se ocultó en la copia pública y aparece con verificación pendiente: hay configuración de notificación, pero **no hay evidencia de entrega**. AWS Budget solo avisa; la terminación de instancias depende del controller de Emilio.
+La copia pública, etiquetada con la hora de entrega 14:47, muestra `CCU4-Budget-1USD`, 1.00 USD mensuales, periodo `Mensual`, inicio `2026-11-01`, estado `En buen estado`, gasto visible de 0,00 US$ y la regla `Costo real > 100%`. El destinatario del correo se ocultó en la copia pública y aparece con verificación pendiente: hay configuración de notificación, pero **no hay evidencia de entrega**. AWS Budget solo avisa; la terminación de instancias depende del controller de Emilio.
 
 La plantilla `infra/aws/budget.json` conserva las alertas `ACTUAL` al 50/80/100 % y `FORECASTED` al 100 % como contrato reproducible; la captura confirma únicamente la regla visible indicada. No se crearon instancias, no se ampliaron permisos y no se modificó el trabajo de otros integrantes. Detalle completo y limitaciones: `docs/evidencia/2026-11-27-1440-aws-iam-budget.md`.
 
