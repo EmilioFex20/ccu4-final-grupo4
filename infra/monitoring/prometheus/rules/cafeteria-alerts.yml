@@ -1,0 +1,84 @@
+groups:
+  - name: cafeteria-disponibilidad
+    rules:
+      - alert: APIHealthProbeFailing
+        expr: cafeteria_probe_up{endpoint="health"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "La sonda /health de la API está fallando"
+          description: "La API no responde 2xx/3xx en la última sonda. Revisar /health y los contenedores api, postgres y redis."
+
+      - alert: APIMenuProbeFailing
+        expr: cafeteria_probe_up{endpoint="menu"} == 0
+        for: 3m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "La sonda /menu de la API está fallando"
+          description: "El menú no responde correctamente; revisar Postgres, Redis y la API."
+
+      - alert: APIProbeLatencyHigh
+        expr: histogram_quantile(0.95, sum by (le, endpoint) (rate(cafeteria_probe_duration_seconds_bucket[5m]))) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "Latencia p95 de sondas mayor a 1 segundo"
+          description: "La latencia observada por las sondas del exportador supera 1s durante 5 minutos."
+
+      - alert: APIProbeErrorRateHigh
+        expr: sum by (endpoint) (rate(cafeteria_probe_errors_total[5m])) / clamp_min(sum by (endpoint) (rate(cafeteria_probe_requests_total[5m])), 0.001) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "Tasa de errores de sondas mayor al 10%"
+          description: "Más del 10% de las sondas HTTP fallaron en los últimos 5 minutos."
+
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring
+        annotations:
+          summary: "Un target de Prometheus está caído"
+          description: "Prometheus no pudo scrapear {{ $labels.job }} en {{ $labels.instance }} durante 2 minutos."
+
+  - name: cafeteria-recursos
+    rules:
+      - alert: ContainerHighCPU
+        expr: sum by (name) (rate(cafeteria_container_cpu_seconds_total[5m])) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Uso de CPU elevado en {{ $labels.name }}"
+          description: "El contenedor supera 0.8 cores de forma sostenida durante 5 minutos."
+
+      - alert: ContainerHighMemory
+        expr: cafeteria_container_memory_bytes > 268435456
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Uso de memoria elevado en {{ $labels.name }}"
+          description: "El contenedor supera 256 MiB de memoria durante 5 minutos."
+
+      - alert: ContainerRestartLoop
+        expr: increase(cafeteria_container_restart_count[15m]) > 3
+        for: 1m
+        labels:
+          severity: critical
+          service: docker
+        annotations:
+          summary: "Reinicios frecuentes en {{ $labels.name }}"
+          description: "El contenedor se reinició más de 3 veces en 15 minutos."

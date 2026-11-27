@@ -25,9 +25,13 @@ venv/
 infra/lambda/*.zip
 infra/lambda/build/
 
-# --- Locust: reportes generados (la evidencia va en docs/evidencia/) ---
+# --- Locust: reportes generados (se versionan solo evidencias selectas) ---
 loadtest/*.csv
 loadtest/*.html
+loadtest/results/
+
+# --- Chaos engineering: resultados generados (se versiona el informe canónico) ---
+chaos/results/
 
 # --- Logs ---
 *.log

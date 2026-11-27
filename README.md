@@ -103,11 +103,11 @@ Variables de entorno que todos deben usar igual:
   - [x] Dockerfiles de `api` y `web`
   - [x] `docker-compose.yml` para levantar todo en local
 - **Johana**
-  - [ ] IAM policy que solo permita instancias Free Tier (t2.micro y t3.micro)
-  - [ ] Budget Alarm de $1.00 en AWS
-  - [ ] Capturas del pipeline, de GHCR y del dashboard de Floci en `docs/evidencia/`
-  - [ ] Reporte del Milestone 1
-  - [ ] Borrador del diagrama de arquitectura
+  - [x] IAM policy que solo permita instancias Free Tier (t2.micro y t3.micro) — creada en AWS como `CCU4-RestrictEC2MicroInstances`; evidencia 14:40. Falta adjuntarla a un principal y probar la denegación
+  - [x] Budget Alarm de $1.00 en AWS — creado como `CCU4-Budget-1USD`; evidencia 14:47 con umbral y notificación configurada. Falta confirmar entrega del correo
+  - [ ] Capturas del pipeline, de GHCR y del dashboard de Floci en `docs/evidencia/` — pipeline, GHCR por logs y AWS obtenidos; falta el dashboard de Floci
+  - [x] Reporte del Milestone 1 — `docs/reporte-milestone-1.md`
+  - [x] Borrador del diagrama de arquitectura — `docs/arquitectura.md`
 
 ---
 
@@ -138,6 +138,26 @@ docker compose up --build
 _(Los puertos pueden cambiar cuando Carlos defina los servicios.)_
 
 ---
+
+## Monitoreo, carga y resiliencia (Johana)
+
+Documentación: [`docs/guia-aws.md`](docs/guia-aws.md), [`docs/evidencia/2026-11-27-1440-aws-iam-budget.md`](docs/evidencia/2026-11-27-1440-aws-iam-budget.md), [`docs/guia-monitoreo.md`](docs/guia-monitoreo.md), [`docs/guia-grafana.md`](docs/guia-grafana.md), [`docs/guia-locust.md`](docs/guia-locust.md) y [`docs/guia-chaos.md`](docs/guia-chaos.md).
+
+```bash
+python infra/aws/verify.py
+docker compose up -d --build
+cd infra/monitoring
+cp .env.example .env
+# Definir GF_SECURITY_ADMIN_PASSWORD solo en .env local
+docker compose -f docker-compose.monitoring.yml up -d --build
+cd ../..
+powershell -ExecutionPolicy Bypass -File ./loadtest/run_loadtest.ps1
+powershell -ExecutionPolicy Bypass -File ./chaos/run_chaos.ps1
+```
+
+Prometheus: `http://localhost:9090` · Grafana: `http://localhost:3001`. Las instancias AWS solo se crean con autorización y viven de 5 a 10 minutos.
+
+Verificación real del 2026-11-27: 3 targets `up` en Prometheus, 14,076 peticiones de Locust con 0 fallos, chaos con 8 escenarios `ok` (`reverse_proxy` pendiente de Jesús) y capturas reales de la política IAM y del budget en AWS. Detalle local: [`docs/evidencia/2026-11-27-1314-stack-monitoreo-carga-chaos.md`](docs/evidencia/2026-11-27-1314-stack-monitoreo-carga-chaos.md). Detalle AWS: [`docs/evidencia/2026-11-27-1440-aws-iam-budget.md`](docs/evidencia/2026-11-27-1440-aws-iam-budget.md).
 
 ## Recordatorios
 

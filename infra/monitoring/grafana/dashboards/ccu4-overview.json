@@ -1,0 +1,211 @@
+{
+  "uid": "ccu4-overview",
+  "title": "CCU4 · Estado general de la cafetería",
+  "tags": ["ccu4", "sre", "cafeteria"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "editable": false,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "endpoint",
+        "label": "Endpoint sondeado",
+        "type": "query",
+        "query": "label_values(cafeteria_probe_up, endpoint)",
+        "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "sort": 1,
+        "refresh": 1,
+        "current": {"selected": true, "text": "All", "value": "$__all"}
+      },
+      {
+        "name": "container",
+        "label": "Contenedor",
+        "type": "query",
+        "query": "label_values(cafeteria_container_running, name)",
+        "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "sort": 1,
+        "refresh": 1,
+        "current": {"selected": true, "text": "All", "value": "$__all"}
+      },
+      {
+        "name": "job",
+        "label": "Job de Prometheus",
+        "type": "query",
+        "query": "label_values(up, job)",
+        "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "sort": 1,
+        "refresh": 1,
+        "current": {"selected": true, "text": "All", "value": "$__all"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Disponibilidad de /health (ventana 5 min)",
+      "description": "Porcentaje de sondas exitosas sobre el endpoint de salud real de la API.",
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "avg_over_time(cafeteria_probe_up{endpoint=\"health\"}[5m]) * 100", "legendFormat": "Disponibilidad"}],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "min": 0,
+          "max": 100,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "orange", "value": 90}, {"color": "green", "value": 99}]}
+        },
+        "overrides": []
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "background", "graphMode": "area", "textMode": "auto"}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Sondas por segundo",
+      "description": "Tasa de peticiones generadas por el exportador de sondas; no es el tráfico real de clientes.",
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "sum(rate(cafeteria_probe_requests_total[$__rate_interval]))", "legendFormat": "sondas/s"}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "decimals": 2}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "value", "graphMode": "area", "textMode": "auto"}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Tasa de errores de sonda",
+      "description": "Sondas fallidas por red o código HTTP >= 400.",
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "sum(rate(cafeteria_probe_errors_total[$__rate_interval]))", "legendFormat": "errores/s"}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 0.1}]}}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "background", "graphMode": "area", "textMode": "auto"}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Contenedores en ejecución",
+      "description": "Contenedores observados por Docker Engine en el stack local.",
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "count(cafeteria_container_running == 1)", "legendFormat": "activos"}],
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "value", "graphMode": "none", "textMode": "auto"}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Latencia de sondas: promedio y p95",
+      "description": "Latencia medida por el exportador hacia /health y /menu. No sustituye la latencia real de clientes.",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [
+        {"refId": "A", "expr": "histogram_quantile(0.95, sum by (le, endpoint) (rate(cafeteria_probe_duration_seconds_bucket{endpoint=~\"$endpoint\"}[$__rate_interval])))", "legendFormat": "p95 {{endpoint}}"},
+        {"refId": "B", "expr": "sum by (endpoint) (rate(cafeteria_probe_duration_seconds_sum{endpoint=~\"$endpoint\"}[$__rate_interval])) / clamp_min(sum by (endpoint) (rate(cafeteria_probe_duration_seconds_count{endpoint=~\"$endpoint\"}[$__rate_interval])), 0.001)", "legendFormat": "promedio {{endpoint}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never", "spanNulls": false, "stacking": {"mode": "none"}}
+        },
+        "overrides": []
+      },
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Tráfico de sondas por endpoint",
+      "description": "Solicitudes por segundo generadas por las sondas del exportador.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "sum by (endpoint) (rate(cafeteria_probe_requests_total{endpoint=~\"$endpoint\"}[$__rate_interval]))", "legendFormat": "{{endpoint}}"}],
+      "fieldConfig": {"defaults": {"unit": "reqps", "decimals": 2, "custom": {"drawStyle": "line", "fillOpacity": 15, "lineWidth": 2, "showPoints": "never", "stacking": {"mode": "none"}}}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Tasa de errores HTTP de sondas",
+      "description": "Fracción de sondas fallidas por endpoint en ventana móvil.",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "sum by (endpoint) (rate(cafeteria_probe_errors_total{endpoint=~\"$endpoint\"}[$__rate_interval])) / clamp_min(sum by (endpoint) (rate(cafeteria_probe_requests_total{endpoint=~\"$endpoint\"}[$__rate_interval])), 0.001)", "legendFormat": "{{endpoint}}"}],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "decimals": 3, "min": 0, "max": 1, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}}
+    },
+    {
+      "id": 8,
+      "type": "table",
+      "title": "Estado actual de los endpoints",
+      "description": "Valor instantáneo de la última sonda por endpoint.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "cafeteria_probe_up{endpoint=~\"$endpoint\"}", "legendFormat": "{{endpoint}}", "format": "table", "instant": true}],
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0, "custom": {"align": "auto", "cellOptions": {"type": "auto"}}}, "overrides": []},
+      "options": {"showHeader": true, "cellHeight": "sm"}
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "CPU por contenedor (núcleos)",
+      "description": "Tasa de segundos de CPU por contenedor, obtenida de Docker Engine.",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "sum by (name) (rate(cafeteria_container_cpu_seconds_total{name=~\"$container\"}[$__rate_interval]))", "legendFormat": "{{name}}"}],
+      "fieldConfig": {"defaults": {"unit": "none", "decimals": 3, "min": 0, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}}
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Memoria por contenedor",
+      "description": "Memoria en uso reportada por Docker Engine.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "cafeteria_container_memory_bytes{name=~\"$container\"}", "legendFormat": "{{name}}"}],
+      "fieldConfig": {"defaults": {"unit": "bytes", "decimals": 1, "min": 0, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}}
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Targets de Prometheus",
+      "description": "Disponibilidad de los jobs configurados, incluyendo los archivos targets.d cuando tengan destinos.",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 29},
+      "datasource": {"type": "prometheus", "uid": "prometheus-ccu4"},
+      "targets": [{"refId": "A", "expr": "up{job=~\"$job\"}", "legendFormat": "{{job}} · {{instance}}"}],
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0, "min": 0, "max": 1, "custom": {"drawStyle": "line", "fillOpacity": 5, "lineWidth": 2, "showPoints": "never"}}, "overrides": []},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}}
+    },
+    {
+      "id": 12,
+      "type": "text",
+      "title": "Integraciones pendientes: escalamiento, proxy y AWS",
+      "description": "Estado honesto de las métricas que aún no existen en el repositorio.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 29},
+      "options": {
+        "mode": "markdown",
+        "content": "**No hay métricas ficticias en este dashboard.**\n\n- Eventos de escalamiento: pendiente de que Emilio exponga `/metrics` en el controller y registre su destino en `infra/monitoring/prometheus/targets.d/controller.json`.\n- Métricas del reverse proxy: pendiente de Jesús con el mismo mecanismo en `reverse-proxy.json`.\n- Tráfico local vs AWS y duración de instancias: pendiente de que el controller publique etiquetas de origen; el README exige que las instancias vivan 5–10 minutos.\n- RPS, latencia y errores del tráfico real de clientes: requiere instrumentar la API con `prometheus_client` (cambio en responsabilidad de Carlos, pendiente de autorización). Hoy solo se miden las sondas del exportador.\n\nCuando existan esos endpoints, los paneles se agregan sin modificar la API ni el pipeline."
+      }
+    }
+  ]
+}

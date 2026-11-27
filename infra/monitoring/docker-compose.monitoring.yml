@@ -1,0 +1,74 @@
+name: ccu4-monitoring
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - ./prometheus/targets.d:/etc/prometheus/targets.d:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - monitoring
+      - app
+
+  app-exporter:
+    build:
+      context: ./exporters
+      args:
+        EXPORTER_SCRIPT: app_exporter.py
+    environment:
+      EXPORTER_PORT: "9101"
+      PROBE_TARGETS: ${PROBE_TARGETS:-health=http://api:8000/health,menu=http://api:8000/menu}
+      PROBE_INTERVAL_SECONDS: ${PROBE_INTERVAL_SECONDS:-15}
+      PROBE_TIMEOUT_SECONDS: ${PROBE_TIMEOUT_SECONDS:-3}
+    networks:
+      - monitoring
+      - app
+
+  docker-exporter:
+    build:
+      context: ./exporters
+      args:
+        EXPORTER_SCRIPT: docker_exporter.py
+    environment:
+      EXPORTER_PORT: "9102"
+      COLLECT_INTERVAL_SECONDS: ${COLLECT_INTERVAL_SECONDS:-15}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    env_file:
+      - .env
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    networks:
+      - monitoring
+      - app
+
+networks:
+  monitoring:
+  app:
+    external: true
+    name: ${APP_NETWORK:-ccu4-final-grupo4_default}
+
+volumes:
+  prometheus-data:
+  grafana-data:

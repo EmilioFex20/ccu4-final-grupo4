@@ -1,0 +1,18 @@
+2026-11-27T20:59:45Z FASE normal usuarios=2
+2026-11-27T20:59:45Z INICIO host=http://localhost:8001 normal=2 pico=4 spike=6 rampa=2/s duraciones={"normal": 2, "ramp_down": 2, "ramp_up": 2, "recovery": 2, "spike": 2, "sustained": 2}
+2026-11-27T20:59:47Z FASE ramp_up usuarios=2
+2026-11-27T20:59:49Z FASE spike usuarios=6
+2026-11-27T20:59:51Z FASE sustained usuarios=4
+2026-11-27T20:59:53Z FASE ramp_down usuarios=4
+2026-11-27T20:59:55Z FASE recovery usuarios=2
+2026-11-27T20:59:57Z FASE finalizada usuarios=0
+2026-11-27T20:59:57Z FIN total_requests=14 failures=0 avg_response_ms=2037.7 max_response_ms=2070
+2026-11-27T21:07:07Z FASE normal usuarios=10
+2026-11-27T21:07:07Z INICIO host=http://localhost:8000 normal=10 pico=100 spike=150 rampa=10/s duraciones={"normal": 30, "ramp_down": 60, "ramp_up": 60, "recovery": 30, "spike": 30, "sustained": 60}
+2026-11-27T21:07:37Z FASE ramp_up usuarios=11
+2026-11-27T21:08:38Z FASE spike usuarios=150
+2026-11-27T21:09:08Z FASE sustained usuarios=100
+2026-11-27T21:10:08Z FASE ramp_down usuarios=91
+2026-11-27T21:11:08Z FASE recovery usuarios=10
+2026-11-27T21:11:38Z FASE finalizada usuarios=0
+2026-11-27T21:11:38Z FIN total_requests=14076 failures=0 avg_response_ms=22.6 max_response_ms=195
