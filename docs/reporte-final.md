@@ -21,6 +21,10 @@ python docs/generar_pdf.py --input docs/CCU4-FinalProject-4.md --output CCU4-Fin
 
 Si se prefiere otro entorno: `python -m pip install reportlab==4.4.10` y `python docs/generar_pdf.py`.
 
+## Seguridad de credenciales
+
+El 2026-11-27 GitGuardian detectó una contraseña genérica asociada al administrador de Grafana en el commit `cd6ffea` (ID `41459752`). La credencial se rotó en la base persistente sin borrar volúmenes; la anterior devuelve `401` y la nueva `200`. `.env.example` ya no contiene valores de contraseña y el Compose carga la credencial desde `.env` ignorado. El incidente está mitigado, pero no se declara cerrado hasta retirar el valor del historial o resolver la alerta en GitGuardian. Detalle: [`incidente-gitguardian-41459752.md`](incidente-gitguardian-41459752.md).
+
 ## Índice de documentación de Johana
 
 | Tema | Archivo |
@@ -36,5 +40,6 @@ Si se prefiere otro entorno: `python -m pip install reportlab==4.4.10` y `python
 | Chaos engineering | `docs/guia-chaos.md` |
 | Matriz de pruebas | `docs/matriz-pruebas.md` |
 | Incidencias | `docs/incidencias.md` |
+| Incidente GitGuardian 41459752 | `docs/incidente-gitguardian-41459752.md` |
 | Post-mortem | `docs/post-mortem.md` |
 | Evidencias | `docs/evidencia/README.md` |

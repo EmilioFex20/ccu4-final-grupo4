@@ -20,6 +20,7 @@ La implementación de monitoreo, carga y resiliencia quedó lista y se verificó
 2. Dependencias entre integrantes: las señales de escalamiento y ruteo requieren componentes que aún no están en `main`.
 3. Decisión deliberada de no modificar código ajeno: instrumentar la API o sustituir el proxy cambiaría responsabilidades de Carlos y Jesús.
 4. Defectos propios detectados al integrar: soporte de socket Unix en el exporter de Docker, uso de `/health` en chaos y codificación de PowerShell 5.1; todos corregidos y documentados en `docs/incidencias.md`.
+5. Configuración de Grafana con un valor de contraseña de ejemplo y referencia explícita en Compose, detectada por GitGuardian como INC-12; credencial rotada y rotación verificada.
 
 ## Acciones correctivas
 
@@ -30,6 +31,8 @@ La implementación de monitoreo, carga y resiliencia quedó lista y se verificó
 | Autorizar o rechazar la instrumentación `/metrics` de la API | Carlos y equipo | Pendiente |
 | Aportar captura de Floci y de GHCR Packages | Emilio/Jesús | Pendiente |
 | Repetir el post-mortem con datos de AWS reales | Johana | Pendiente: requiere controller y autorización |
+| Rotar y verificar la credencial de Grafana tras GitGuardian 41459752 | Johana | Completada; anterior `401`, nueva `200` |
+| Retirar la credencial del historial de `feature/johana-sre` | Johana + equipo | Pendiente: requiere autorización para reescribir y force push |
 
 ## Lecciones aprendidas
 

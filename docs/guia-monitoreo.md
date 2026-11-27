@@ -62,8 +62,8 @@ Variables en `infra/monitoring/.env`:
 
 | Variable | Descripción | Valor por defecto |
 |---|---|---|
-| `GRAFANA_ADMIN_USER` | usuario admin de Grafana | `admin` |
-| `GRAFANA_ADMIN_PASSWORD` | obligatoria; sin valor el Compose falla | — |
+| `GF_SECURITY_ADMIN_USER` | usuario admin de Grafana | `admin` |
+| `GF_SECURITY_ADMIN_PASSWORD` | obligatoria; se define solo en `.env` local, sin valor en `.env.example` | — |
 | `GRAFANA_PORT` | puerto host de Grafana | `3001` |
 | `PROMETHEUS_PORT` | puerto host de Prometheus | `9090` |
 | `APP_NETWORK` | red externa del stack principal | `ccu4-final-grupo4_default` |
@@ -88,7 +88,7 @@ en `infra/monitoring/prometheus/targets.d/controller.json` o `reverse-proxy.json
 
 ```powershell
 python -c "import json,pathlib; json.loads(pathlib.Path('infra/monitoring/grafana/dashboards/ccu4-overview.json').read_text(encoding='utf-8')); print('dashboard JSON OK')"
-docker compose -f infra/monitoring/docker-compose.monitoring.yml --env-file infra/monitoring/.env.example config --quiet
+docker compose -f infra/monitoring/docker-compose.monitoring.yml config --quiet
 docker run --rm -v ${PWD}/infra/monitoring/prometheus:/etc/prometheus prom/prometheus:v2.55.0 promtool check config /etc/prometheus/prometheus.yml
 ```
 
@@ -97,3 +97,5 @@ La última validación requiere Docker daemon y se reportará como pendiente si 
 ## Seguridad
 
 El exporter de Docker monta `/var/run/docker.sock` en modo solo lectura. El socket equivale a acceso root sobre el daemon: usarlo solo en entorno local de pruebas, sin exponer sus puertos fuera del host y con el Compose complementario desactivado en producción hasta revisar permisos.
+
+La credencial administrativa de Grafana se carga desde `.env` local ignorado y no tiene valor por defecto en `.env.example`. Si el volumen `grafana-data` ya existe, rotar la contraseña requiere actualizar también la base de Grafana con su CLI; cambiar solo la variable no basta. Detalle: [`incidente-gitguardian-41459752.md`](incidente-gitguardian-41459752.md).

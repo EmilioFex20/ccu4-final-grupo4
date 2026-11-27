@@ -9,17 +9,26 @@ Responsable: Johana. Grafana se aprovisiona automáticamente desde `infra/monito
 | `grafana/provisioning/datasources/prometheus.yml` | Datasource `Prometheus`, UID `prometheus-ccu4`, URL `http://prometheus:9090`, predeterminado y no editable desde la UI |
 | `grafana/provisioning/dashboards/dashboards.yml` | Proveedor de archivos, carpeta `CCU4`, sin borrado ni edición desde la UI |
 | `grafana/dashboards/ccu4-overview.json` | Dashboard “CCU4 · Estado general de la cafetería” |
-| `docker-compose.monitoring.yml` | Persistencia en volumen `grafana-data`, password por variable de entorno |
+| `docker-compose.monitoring.yml` | Persistencia en volumen `grafana-data`; credencial cargada desde `.env` local ignorado |
 
 ## Arranque
 
 ```powershell
 cd infra/monitoring
 cp .env.example .env
+# Definir GF_SECURITY_ADMIN_PASSWORD solo en el .env local antes de arrancar
 docker compose -f docker-compose.monitoring.yml up -d --build
 ```
 
 Abrir http://localhost:3001. El primer arranque crea la carpeta `CCU4` y el dashboard sin intervención manual. Si el dashboard no aparece, revisar `docker compose -f docker-compose.monitoring.yml logs grafana`.
+
+## Configuración segura de credenciales
+
+- `.env.example` deja `GF_SECURITY_ADMIN_PASSWORD=` vacío: no contiene credenciales reales ni valores de ejemplo reutilizables.
+- El Compose usa `env_file: .env`; la contraseña no aparece como literal en ningún archivo versionado.
+- `.env` está ignorado por Git y debe permanecer solo en la máquina local. Nunca se sube al repositorio ni a las evidencias.
+- Si el volumen `grafana-data` ya existe, cambiar la variable de entorno no actualiza la contraseña guardada en la base de Grafana. La rotación debe hacerse con la CLI de Grafana dentro del contenedor, conservando el volumen.
+- Detalle del incidente y verificación: [`incidente-gitguardian-41459752.md`](incidente-gitguardian-41459752.md).
 
 ## Dashboard
 

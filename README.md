@@ -146,7 +146,10 @@ Documentación: [`docs/guia-aws.md`](docs/guia-aws.md), [`docs/guia-monitoreo.md
 ```bash
 python infra/aws/verify.py
 docker compose up -d --build
-cd infra/monitoring && cp .env.example .env && docker compose -f docker-compose.monitoring.yml up -d --build
+cd infra/monitoring
+cp .env.example .env
+# Definir GF_SECURITY_ADMIN_PASSWORD solo en .env local
+docker compose -f docker-compose.monitoring.yml up -d --build
 cd ../..
 powershell -ExecutionPolicy Bypass -File ./loadtest/run_loadtest.ps1
 powershell -ExecutionPolicy Bypass -File ./chaos/run_chaos.ps1

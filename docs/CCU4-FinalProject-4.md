@@ -124,11 +124,13 @@ Matriz completa: `docs/matriz-pruebas.md`.
 
 Incidencias principales: daemon de Docker apagado al inicio (resuelto), falta de scope `read:packages` para listar GHCR, ausencia de controller y proxy, falta de `/metrics` en la API y ausencia de dashboard de Floci en este equipo. Durante la integración se corrigieron tres defectos propios: el exporter de Docker no soportaba socket Unix en Python 3.13, el script de chaos comprobaba la raíz de la API en lugar de `/health`, y PowerShell 5.1 necesitaba BOM para codificar el informe. `promtool` no estaba instalado y se resolvió descargando el release oficial a un directorio temporal; las rutas del config se ajustaron para que la validación local no emitiera advertencias.
 
-Detalle: `docs/incidencias.md` y `docs/post-mortem.md`.
+El 2026-11-27 se detectó además el incidente GitGuardian `41459752`: una contraseña genérica asociada al administrador de Grafana quedó referenciada en el Compose del commit `cd6ffea`. La causa raíz fue un valor de ejemplo en `.env.example` junto con una referencia explícita a la variable en `environment`. La credencial se rotó en la base persistente de Grafana sin borrar volúmenes: la anterior devuelve `401` y la nueva `200`; el datasource y el dashboard permanecen intactos. El Compose ahora carga la credencial desde `.env` ignorado y `.env.example` no contiene valores sensibles. La alerta sigue pendiente de cierre porque el valor original permanece en el historial y retirarlo requiere autorización para reescribir la rama. Detalle: `docs/incidente-gitguardian-41459752.md`.
+
+Detalle: `docs/incidencias.md`, `docs/post-mortem.md` e `incidente-gitguardian-41459752.md`.
 
 ## 14. Evidencias disponibles y pendientes
 
-Disponibles: pipeline CI, push a GHCR por logs, herramientas y validación local IAM/Budget, validación de Prometheus con `promtool`, evidencia de stack real, targets y dashboard, CSV/HTML de Locust y JSON de chaos.
+Disponibles: pipeline CI, push a GHCR por logs, herramientas y validación local IAM/Budget, validación de Prometheus con `promtool`, evidencia de stack real, targets y dashboard, CSV de Locust y JSON de chaos.
 
 Pendientes: captura visual de Floci, captura de GHCR Packages, AWS real, correlación Locust ↔ AWS y validación del reverse proxy de Jesús.
 
