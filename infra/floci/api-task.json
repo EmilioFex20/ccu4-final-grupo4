@@ -1,0 +1,20 @@
+{
+  "family": "cafeteria-api",
+  "networkMode": "bridge",
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "ghcr.io/emiliofex20/ccu4-final-grupo4/api:latest",
+      "essential": true,
+      "memory": 256,
+      "portMappings": [{ "containerPort": 8000, "hostPort": 8000 }],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgresql://USUARIO:PASSWORD@host.docker.internal:5432/NOMBRE_DB"
+        },
+        { "name": "REDIS_URL", "value": "redis://host.docker.internal:6379" }
+      ]
+    }
+  ]
+}

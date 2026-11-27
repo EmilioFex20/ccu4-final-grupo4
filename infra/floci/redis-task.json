@@ -1,0 +1,13 @@
+{
+  "family": "cafeteria-redis",
+  "networkMode": "bridge",
+  "containerDefinitions": [
+    {
+      "name": "redis",
+      "image": "redis:7-alpine",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [{ "containerPort": 6379, "hostPort": 6379 }]
+    }
+  ]
+}

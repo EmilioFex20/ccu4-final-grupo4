@@ -1,8 +1,40 @@
-# Node dependencies
-node_modules/
-
-# Environment variables
+# --- Credenciales (nunca subir) ---
 .env
+.env.*
+!.env.example
+.aws/
+# Llaves SSH de las instancias EC2
+*.pem
+*.ppk
+# Llaves que se descargan desde la consola de AWS
+*accessKeys*.csv
+*credentials*.csv
 
-# Python cache
+# --- Floci (infra/floci/compose.yaml monta ./data) ---
+infra/floci/data/
+
+# --- Python: api/, scripts de boto3, controller, lambda y Locust ---
 __pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# --- Lambda: paquetes generados al desplegar ---
+infra/lambda/*.zip
+infra/lambda/build/
+
+# --- Locust: reportes generados (la evidencia va en docs/evidencia/) ---
+loadtest/*.csv
+loadtest/*.html
+
+# --- Logs ---
+*.log
+
+# --- Sistema operativo y editores ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

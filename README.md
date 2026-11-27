@@ -92,16 +92,16 @@ Variables de entorno que todos deben usar igual:
 - **Emilio**
   - [x] Crear el repo y la estructura de carpetas
   - [x] Escribir el contrato de la API en `docs/api.md`
-  - [ ] Probar Floci con una imagen de ejemplo (jueves)
-  - [ ] Desplegar el stack en Floci con las imágenes de GHCR (viernes)
+  - [x] Probar Floci con una imagen de ejemplo (jueves)
+  - [x] Desplegar el stack en Floci con las imágenes de GHCR (viernes)
 - **Jesús**
   - [x] Crear `.github/workflows/ci.yml` que, en cada push a `main`, valide el código, construya las imágenes de `api` y `web` y las suba a GHCR
   - [x] Confirmar que las imágenes aparecen en la sección Packages del repo
 - **Carlos**
-  - [ ] API stateless con Postgres y Redis, incluyendo `/health`
-  - [ ] Frontend sencillo que consuma la API
-  - [ ] Dockerfiles de `api` y `web`
-  - [ ] `docker-compose.yml` para levantar todo en local
+  - [x] API stateless con Postgres y Redis, incluyendo `/health`
+  - [x] Frontend sencillo que consuma la API
+  - [x] Dockerfiles de `api` y `web`
+  - [x] `docker-compose.yml` para levantar todo en local
 - **Johana**
   - [ ] IAM policy que solo permita instancias Free Tier (t2.micro y t3.micro)
   - [ ] Budget Alarm de $1.00 en AWS

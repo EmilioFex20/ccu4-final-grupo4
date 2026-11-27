@@ -1,0 +1,14 @@
+{
+  "family": "cafeteria-web",
+  "networkMode": "bridge",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "ghcr.io/emiliofex20/ccu4-final-grupo4/web:latest",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [{ "containerPort": 8080, "hostPort": 3000 }],
+      "environment": [{ "name": "API_URL", "value": "http://localhost:8000" }]
+    }
+  ]
+}

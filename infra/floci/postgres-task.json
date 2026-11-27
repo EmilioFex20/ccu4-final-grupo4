@@ -1,0 +1,18 @@
+{
+  "family": "cafeteria-postgres",
+  "networkMode": "bridge",
+  "containerDefinitions": [
+    {
+      "name": "postgres",
+      "image": "postgres:16-alpine",
+      "essential": true,
+      "memory": 256,
+      "portMappings": [{ "containerPort": 5432, "hostPort": 5432 }],
+      "environment": [
+        { "name": "POSTGRES_USER", "value": "USUARIO" },
+        { "name": "POSTGRES_PASSWORD", "value": "PASSWORD" },
+        { "name": "POSTGRES_DB", "value": "NOMBRE_DB" }
+      ]
+    }
+  ]
+}
