@@ -95,8 +95,8 @@ Variables de entorno que todos deben usar igual:
   - [ ] Probar Floci con una imagen de ejemplo (jueves)
   - [ ] Desplegar el stack en Floci con las imágenes de GHCR (viernes)
 - **Jesús**
-  - [ ] Crear `.github/workflows/ci.yml` que, en cada push a `main`, valide el código, construya las imágenes de `api` y `web` y las suba a GHCR
-  - [ ] Confirmar que las imágenes aparecen en la sección Packages del repo
+  - [x] Crear `.github/workflows/ci.yml` que, en cada push a `main`, valide el código, construya las imágenes de `api` y `web` y las suba a GHCR
+  - [x] Confirmar que las imágenes aparecen en la sección Packages del repo
 - **Carlos**
   - [ ] API stateless con Postgres y Redis, incluyendo `/health`
   - [ ] Frontend sencillo que consuma la API
