@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cafetería · Pedidos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header><h1>Cafetería</h1><p>Haz tu pedido y consulta su estado</p></header>
+  <main>
+    <section>
+      <h2>Menú y pedido</h2>
+      <form id="order-form">
+        <div id="menu">Cargando menú…</div>
+        <p class="total">Total estimado: <strong id="estimate">$0.00 MXN</strong></p>
+        <label for="customer">Tu nombre</label>
+        <input id="customer" maxlength="100" required autocomplete="off">
+        <button id="send" type="submit">Hacer pedido</button>
+      </form>
+      <p id="order-message" role="status"></p>
+    </section>
+    <section>
+      <h2>Consultar pedido</h2>
+      <form id="status-form">
+        <label for="order-id">Número de pedido</label>
+        <input id="order-id" type="number" min="1" required>
+        <button type="submit">Consultar</button>
+      </form>
+      <div id="order-result" role="status"></div>
+    </section>
+  </main>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
